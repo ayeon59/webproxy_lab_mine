@@ -120,11 +120,39 @@ void doit(int fd){
 
 /*<------------------------------------------------------------------------------------------------------------------->*/
 
+// void serve_static(int fd, char *filename, int filesize) {
+//     int srcfd;
+//     /* Heap buf to save file content */
+//     char *filebuf;                       
+//     char *srcp, filetype[MAXLINE], buf[MAXBUF];
+
+
+//     get_filetype(filename, filetype);
+//     sprintf(buf, "HTTP/1.0 200 OK\r\n");
+//     sprintf(buf, "%sServer: Tiny Web Server\r\n", buf);
+//     sprintf(buf, "%sConnection: close\r\n", buf);
+//     sprintf(buf, "%sContent-length: %d\r\n", buf, filesize);
+//     sprintf(buf, "%sContent-type: %s\r\n\r\n", buf, filetype);
+//     Rio_writen(fd, buf, strlen(buf));
+
+    
+//     srcfd = Open(filename, O_RDONLY, 0);
+//     filebuf = (char *)Malloc(filesize);
+    
+//     Rio_readn(srcfd, filebuf, filesize);
+//     Rio_writen(fd, filebuf, filesize);
+//     Free(filebuf);
+//     Close(srcfd);
+// }
+
+
+//basic serve_static
 void serve_static(int fd, char *filename, int filesize){
     /* File descriptor for finding the requested file on disk */
     int srcfd;
     /* Srcp : pointer to memory-mapped file */
     char *srcp, filetype[MAXLINE], buf[MAXBUF];
+
 
     // Send response headers to client 
     /* Determine the correct MIME type based on the file extension */
