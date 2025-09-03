@@ -30,11 +30,15 @@ int main(int argc, char **argv)
     fprintf(stderr, "usage: %s <port>\n", argv[0]);
     exit(1);
   }
-
+  /* 포트8000을 통해 들어오는 요청을 담당할 리스닝소켓 지정 완료 */
   listenfd = Open_listenfd(argv[1]);
+  /* 포트8000을 통해 들어오는 요청 무한 accept */
   while (1)
   {
     clientlen = sizeof(clientaddr);
+    /* 클라이언트 측에서 url을 입력하는 HTTP 요청을 보내면 브라우저 내부적으로 connect()를 호출한다 .
+    이 호출들은 커널 큐에 쌓이게 되고 서버 측에서는 Accept 함수를 통해 하나의 요청을 꺼낸다.
+    이후 해당 클라이언트 전용 fd를 반환해서 connfd 값으로 넘겨주는 것=*/
     connfd = Accept(listenfd, (SA *)&clientaddr,
                     &clientlen); // line:netp:tiny:accept
     Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE,
