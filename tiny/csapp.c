@@ -1035,10 +1035,12 @@ int open_listenfd(char *port)
         return -1;
 
     /* Make it a listening socket ready to accept connection requests */
+    /* 리슨이 실패하면 반환 자체가 안되기 때문에 최종 listenfd가 반환 되었다면 listen 또한 하고 있다는 말 */
     if (listen(listenfd, LISTENQ) < 0) {
         close(listenfd);
 	return -1;
     }
+    /* 최종 리스닝 소켓 반환 */
     return listenfd;
 }
 /* $end open_listenfd */

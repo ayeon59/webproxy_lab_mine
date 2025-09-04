@@ -64,17 +64,23 @@ void doit(int fd)
   Rio_readinitb(&rio, fd);
   if (!Rio_readlineb(&rio, buf, MAXLINE))
     return;
+  /* 서버 터미널에 클라이언트로부터 받은 요청을 제대로 받았는지 확인하는 디버깅 코드 */
   printf("%s", buf);
+  /* 버퍼에 있는 GET /index.html HTTP/1.1 로 각각 변수에 저장 */
   sscanf(buf, "%s %s %s", method, uri, version);
+  /* 우리가 처리할 GET 방식이 아니면 무시함 */
   if (strcasecmp(method, "GET"))
   {
     clienterror(fd, method, "501", "Not Implemented",
                 "Tiny does not implement this method");
     return;
   }
+  
   read_requesthdrs(&rio);
 
   /* Parse URI from GET request */
+  /* 위에서 sscanf로 가운데 부분 파싱 해놨음 = uri 
+  이제 이 uri에 특정 요소가 포함되었는가 되지 않았는가로 다른 동작을 하려 함*/
   is_static = parse_uri(uri, filename, cgiargs);
   if (stat(filename, &sbuf) < 0)
   {
@@ -191,6 +197,7 @@ void serve_static(int fd, char *filename, int filesize)
   n = snprintf(p, remaining, "Content-type: %s\r\n\r\n", filetype);
   p += n;
   remaining -= n;
+
 
   Rio_writen(fd, buf, strlen(buf));
   printf("Response headers:\n");

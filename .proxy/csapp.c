@@ -802,10 +802,8 @@ ssize_t rio_writen(int fd, void *usrbuf, size_t n)
  *    read() if the internal buffer is empty.
  */
 /* $begin rio_read */
-static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n)
-{
+static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n){
     int cnt;
-
     while (rp->rio_cnt <= 0) {  /* Refill if buf is empty */
 	rp->rio_cnt = read(rp->rio_fd, rp->rio_buf, 
 			   sizeof(rp->rio_buf));
@@ -1004,22 +1002,27 @@ int open_listenfd(char *port)
     hints.ai_socktype = SOCK_STREAM;             /* Accept connections */
     hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG; /* ... on any IP address */
     hints.ai_flags |= AI_NUMERICSERV;            /* ... using port number */
+    /* 오류 처리와 동시에 listp에 와일드카드 주소를 삽입 */
     if ((rc = getaddrinfo(NULL, port, &hints, &listp)) != 0) {
         fprintf(stderr, "getaddrinfo failed (port %s): %s\n", port, gai_strerror(rc));
         return -2;
     }
 
     /* Walk the list for one that we can bind to */
+    /* listp에는 와일드카드 주소가 들어가 있어서 가능한 모든 주소를 순회할 수 있게 함 */
     for (p = listp; p; p = p->ai_next) {
         /* Create a socket descriptor */
+        /* 와일드카드 주소를 활용해서 리스닝 소켓으로 쓸 수 있는 후보 소켓을 만들어줌 */
         if ((listenfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0) 
             continue;  /* Socket failed, try the next */
 
+        /* bind 실패 가능성을 방지함 */    
         /* Eliminates "Address already in use" error from bind */
         setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR,    //line:netp:csapp:setsockopt
                    (const void *)&optval , sizeof(int));
 
         /* Bind the descriptor to the address */
+        /* 해당 주소가 바인드 가능하다면 0을 리턴하면서 우리가 요청한 포트번호와 리스닝 소켓이 bind됨 */
         if (bind(listenfd, p->ai_addr, p->ai_addrlen) == 0)
             break; /* Success */
         if (close(listenfd) < 0) { /* Bind failed, try the next */
@@ -1039,6 +1042,7 @@ int open_listenfd(char *port)
         close(listenfd);
 	return -1;
     }
+    /* 최종 리스닝 소켓 반환 */
     return listenfd;
 }
 /* $end open_listenfd */
